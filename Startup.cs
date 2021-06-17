@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace Gridcoin.WebApi
@@ -32,7 +28,13 @@ namespace Gridcoin.WebApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gridcoin.WebApi", Version = "v1" });
             });
-            services.AddSingleton(x => Configuration.GetValue<GridcoinSettings>("Gridcoin"));
+
+            services.AddHttpClient("gridcoin", x =>
+            {
+                x.BaseAddress = Configuration.GetValue<Uri>("Gridcoin:Uri");
+                var bytes = Encoding.ASCII.GetBytes($"{Configuration.GetValue<string>("Gridcoin:Username")}:{Configuration.GetValue<string>("Gridcoin:Password")}");
+                x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
