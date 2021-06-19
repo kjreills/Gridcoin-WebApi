@@ -53,14 +53,14 @@ namespace Gridcoin.WebApi.Controllers
         }
 
         [HttpGet("getAddress/{account}")]
-        [Authorize(Policy = "read:info")] //TODO: Lock this down to a different scope
+        [Authorize(Policy = "create:address")]
         public Task<object> GetAccountAddress(string account)
         {
             return MakeRpcRequest(new RpcRequest(nameof(GetAccountAddress), account));
         }
 
         [HttpPost("sendPayment")]
-        [Authorize(Policy = "read:info")] //TODO: Lock this down to a different scope
+        [Authorize(Policy = "create:transaction")]
         public Task<object> SendToAddress(Payment payment)
         {
             return MakeRpcRequest(new RpcRequest(nameof(SendToAddress), payment.Address, payment.Amount, payment.TransactionId));

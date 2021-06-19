@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text;
 using Gridcoin.WebApi.Models;
@@ -14,6 +15,8 @@ namespace Gridcoin.WebApi
 {
     public class Startup
     {
+        private readonly List<string> _scopes = new() { "read:info", "create:address", "create:transaction" };
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -21,7 +24,6 @@ namespace Gridcoin.WebApi
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -45,18 +47,13 @@ namespace Gridcoin.WebApi
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.Authority = "https://spectacled.auth0.com/";
-                options.Audience = "https://kjreills.tplinkdns.com";
+                options.Authority = Configuration.GetValue<string>("Authentication:Authority");
+                options.Audience = "Authentication:Audience";
             });
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("read:info", p => p.RequireClaim("scope", "read:info"));
-            });
-
+            services.AddAuthorization(options => _scopes.ForEach(x => options.AddPolicy(x, p => p.RequireClaim("scope", x))));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
