@@ -1,6 +1,8 @@
 using System;
 using System.Net.Http.Headers;
 using System.Text;
+using Gridcoin.WebApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,10 +33,27 @@ namespace Gridcoin.WebApi
 
             services.AddHttpClient("gridcoin", x =>
             {
-                x.BaseAddress = Configuration.GetValue<Uri>("Gridcoin:Uri");
-                var bytes = Encoding.ASCII.GetBytes($"{Configuration.GetValue<string>("Gridcoin:Username")}:{Configuration.GetValue<string>("Gridcoin:Password")}");
+                var gridcoinSettings = Configuration.GetValue<GridcoinSettings>("Gridcoin");
+                x.BaseAddress = gridcoinSettings.Uri;
+                var bytes = Encoding.ASCII.GetBytes($"{gridcoinSettings.Username}:{gridcoinSettings.Password}");
                 x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
             });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = "https://spectacled.auth0.com/";
+                options.Audience = "https://kjreills.tplinkdns.com";
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("read:info", p => p.RequireClaim("scope", "read:info"));
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +69,8 @@ namespace Gridcoin.WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

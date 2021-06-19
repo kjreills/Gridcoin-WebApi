@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Gridcoin.WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Gridcoin.WebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class GridcoinController : ControllerBase
@@ -23,48 +24,64 @@ namespace Gridcoin.WebApi.Controllers
             _http = http;            
         }
 
-        [HttpGet]
-        public async Task<object> GetInfo()
+        [HttpGet("getInfo")]
+        [Authorize(Policy = "read:info")]
+        public Task<object> GetInfo()
         {
-            _logger.LogInformation("GetInfo called");
+            return MakeRpcRequest(new RpcRequest(nameof(GetInfo)));
+        }
 
-            var rpcRequest = new RpcRequest("getinfo");
+        [HttpGet("getTransaction/{transactionId}")]
+        [Authorize(Policy = "read:info")]
+        public Task<object> GetTransaction(string transactionId)
+        {
+            return MakeRpcRequest(new RpcRequest(nameof(GetTransaction), transactionId));
+        }
+
+        [HttpGet("listTransactions")]
+        [Authorize(Policy = "read:info")]
+        public Task<object> ListTransactions(string account = "", int count = 10)
+        {
+            return MakeRpcRequest(new RpcRequest(nameof(ListTransactions), account, count));
+        }
+
+        [HttpGet("validateAddress/{address}")]
+        [Authorize(Policy = "read:info")]
+        public Task<object> ValidateAddress(string address)
+        {
+            return MakeRpcRequest(new RpcRequest(nameof(ValidateAddress), address));
+        }
+
+        [HttpGet("getAddress/{account}")]
+        [Authorize(Policy = "read:info")] //TODO: Lock this down to a different scope
+        public Task<object> GetAccountAddress(string account)
+        {
+            return MakeRpcRequest(new RpcRequest(nameof(GetAccountAddress), account));
+        }
+
+        [HttpPost("sendPayment")]
+        [Authorize(Policy = "read:info")] //TODO: Lock this down to a different scope
+        public Task<object> SendToAddress(Payment payment)
+        {
+            return MakeRpcRequest(new RpcRequest(nameof(SendToAddress), payment.Address, payment.Amount, payment.TransactionId));
+        }
+
+        private async Task<object> MakeRpcRequest(RpcRequest rpcRequest)
+        {
+            _logger.LogInformation($"{rpcRequest.Method} called");
+
             var json = JsonSerializer.Serialize(rpcRequest, _jsonSerializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var client = _http.CreateClient("gridcoin");
             var response = await client.PostAsync("/", content);
-            response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync();
             var responseContent = JsonSerializer.Deserialize<object>(responseBody);
 
-            _logger.LogInformation("GetInfo finished", responseContent);
+            _logger.LogInformation($"{rpcRequest.Method} finished", responseContent);
 
             return responseContent;
         }
-    }
-
-    public class GridcoinSettings 
-    {
-        public Uri Uri { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
-
-    public class RpcRequest
-    {
-        public RpcRequest() { }
-        public RpcRequest(string method) { Method = method; }
-        public RpcRequest(string method, IEnumerable<object> parameters)
-        {
-            Method = method;
-            Params = parameters;
-        }
-
-        public string JsonRpc { get; } = "2.0";
-        public int Id { get; } = 0;
-        public string Method { get; set; }
-        public IEnumerable<object> Params { get; set; } = new List<object>();
     }
 }
