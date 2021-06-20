@@ -35,7 +35,7 @@ namespace Gridcoin.WebApi
 
             services.AddHttpClient("gridcoin", x =>
             {
-                var gridcoinSettings = Configuration.GetValue<GridcoinSettings>("Gridcoin");
+                var gridcoinSettings = Configuration.GetSection("Gridcoin").Get<GridcoinSettings>();
                 x.BaseAddress = gridcoinSettings.Uri;
                 var bytes = Encoding.ASCII.GetBytes($"{gridcoinSettings.Username}:{gridcoinSettings.Password}");
                 x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));

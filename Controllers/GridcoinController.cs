@@ -21,7 +21,7 @@ namespace Gridcoin.WebApi.Controllers
         public GridcoinController(ILogger<GridcoinController> logger, IHttpClientFactory http)
         {
             _logger = logger;
-            _http = http;            
+            _http = http;
         }
 
         [HttpGet("getInfo")]
