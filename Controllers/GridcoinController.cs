@@ -14,6 +14,8 @@ namespace Gridcoin.WebApi.Controllers
     [Route("[controller]")]
     public class GridcoinController : ControllerBase
     {
+        public const string HttpClientKey = "gridcoin";
+
         private readonly ILogger<GridcoinController> _logger;
         private readonly IHttpClientFactory _http;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
@@ -52,14 +54,14 @@ namespace Gridcoin.WebApi.Controllers
             return MakeRpcRequest(new RpcRequest(nameof(ValidateAddress), address));
         }
 
-        [HttpGet("getAddress/{account}")]
+        [HttpGet("getAccountAddress/{account}")]
         [Authorize(Policy = "create:address")]
         public Task<object> GetAccountAddress(string account)
         {
             return MakeRpcRequest(new RpcRequest(nameof(GetAccountAddress), account));
         }
 
-        [HttpPost("sendPayment")]
+        [HttpPost("sendToAddress")]
         [Authorize(Policy = "create:transaction")]
         public Task<object> SendToAddress(Payment payment)
         {

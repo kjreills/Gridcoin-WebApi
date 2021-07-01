@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text;
+using Gridcoin.WebApi.Controllers;
 using Gridcoin.WebApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -31,14 +32,44 @@ namespace Gridcoin.WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gridcoin.WebApi", Version = "v1" });
-            });
 
-            services.AddHttpClient("gridcoin", x =>
-            {
-                var gridcoinSettings = Configuration.GetSection("Gridcoin").Get<GridcoinSettings>();
-                x.BaseAddress = gridcoinSettings.Uri;
-                var bytes = Encoding.ASCII.GetBytes($"{gridcoinSettings.Username}:{gridcoinSettings.Password}");
-                x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+                var oauth2 = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Scheme = "Bearer",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        ClientCredentials = new OpenApiOAuthFlow
+                        {
+                            TokenUrl = new Uri("/oauth/token", UriKind.Relative)
+                        }                        
+                    }
+                };
+
+                c.AddSecurityDefinition("oauth2", oauth2);
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "oauth2"
+                            },
+                            Name = "oauth2"
+                        },
+                        new List<string>{ }
+                    }
+                });
+
+                //new Dictionary<OpenApiSecurityScheme, IList<string>>
+                //{
+                //    { oauth2, _scopes }
+                //}
             });
 
             services.AddAuthentication(options =>
@@ -48,10 +79,25 @@ namespace Gridcoin.WebApi
             }).AddJwtBearer(options =>
             {
                 options.Authority = Configuration.GetValue<string>("Authentication:Authority");
-                options.Audience = "Authentication:Audience";
+                options.Audience = Configuration.GetValue<string>("Authentication:Audience");
             });
 
             services.AddAuthorization(options => _scopes.ForEach(x => options.AddPolicy(x, p => p.RequireClaim("scope", x))));
+
+            services.AddSingleton(x => Configuration.GetSection("Authentication").Get<OAuthSettings>());
+
+            services.AddHttpClient(GridcoinController.HttpClientKey, x =>
+            {
+                var gridcoinSettings = Configuration.GetSection("Gridcoin").Get<GridcoinSettings>();
+                x.BaseAddress = gridcoinSettings.Uri;
+                var bytes = Encoding.ASCII.GetBytes($"{gridcoinSettings.Username}:{gridcoinSettings.Password}");
+                x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
+            });
+
+            services.AddHttpClient(OAuthController.HttpClientKey, x =>
+            {
+                x.BaseAddress = Configuration.GetValue<Uri>("Authentication:Authority");
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
