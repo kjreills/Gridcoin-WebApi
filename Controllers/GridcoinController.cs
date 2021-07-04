@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Gridcoin.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -78,12 +79,19 @@ namespace Gridcoin.WebApi.Controllers
             var client = _http.CreateClient("gridcoin");
             var response = await client.PostAsync("/", content);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Error connecting to Gridcoin wallet", new { response.StatusCode, Content = response.Content.ReadAsStringAsync() });
+
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
             var responseBody = await response.Content.ReadAsStringAsync();
             var responseContent = JsonSerializer.Deserialize<object>(responseBody);
 
             _logger.LogInformation($"{rpcRequest.Method} finished", responseContent);
 
-            return responseContent;
+            return Ok(responseContent);
         }
     }
 }
