@@ -66,7 +66,7 @@ namespace Gridcoin.WebApi.Controllers
         [Authorize(Policy = "create:transaction")]
         public Task<object> SendToAddress(Payment payment)
         {
-            return MakeRpcRequest(new RpcRequest(nameof(SendToAddress), payment.Address, payment.Amount, payment.TransactionId));
+            return MakeRpcRequest(new RpcRequest(nameof(SendToAddress), payment.Address, payment.Amount, payment.ExternalTransactionId));
         }
 
         private async Task<object> MakeRpcRequest(RpcRequest rpcRequest)

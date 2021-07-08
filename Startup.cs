@@ -82,7 +82,18 @@ namespace Gridcoin.WebApi
                 options.Audience = Configuration.GetValue<string>("Authentication:Audience");
             });
 
-            services.AddAuthorization(options => _scopes.ForEach(x => options.AddPolicy(x, p => p.RequireClaim("scope", x))));
+            services.AddAuthorization(options =>
+            {
+                foreach (var scope in _scopes)
+                {
+                    options.AddPolicy(scope,
+                        p => p.RequireAssertion(
+                            ctx => ctx.User.HasClaim(
+                                c => c.Type == "scope"
+                                  && c.Value.Contains(scope)
+                                  && c.Issuer == Configuration.GetValue<string>("Authentication:Authority"))));
+                }
+            });
 
             services.AddSingleton(x => Configuration.GetSection("Authentication").Get<OAuthSettings>());
 
