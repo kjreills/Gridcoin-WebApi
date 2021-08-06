@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Gridcoin.WebApi.Constants;
 using Gridcoin.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -28,42 +29,42 @@ namespace Gridcoin.WebApi.Controllers
         }
 
         [HttpGet("getInfo")]
-        [Authorize(Policy = "read:info")]
+        [Authorize(Policy = Permissions.ReadInfo)]
         public Task<object> GetInfo()
         {
             return MakeRpcRequest(new RpcRequest(nameof(GetInfo)));
         }
 
         [HttpGet("getTransaction/{transactionId}")]
-        [Authorize(Policy = "read:info")]
+        [Authorize(Policy = Permissions.ReadInfo)]
         public Task<object> GetTransaction(string transactionId)
         {
             return MakeRpcRequest(new RpcRequest(nameof(GetTransaction), transactionId));
         }
 
         [HttpGet("listTransactions")]
-        [Authorize(Policy = "read:info")]
+        [Authorize(Policy = Permissions.ReadInfo)]
         public Task<object> ListTransactions(string account = "", int count = 10)
         {
             return MakeRpcRequest(new RpcRequest(nameof(ListTransactions), account, count));
         }
 
         [HttpGet("validateAddress/{address}")]
-        [Authorize(Policy = "read:info")]
+        [Authorize(Policy = Permissions.ReadInfo)]
         public Task<object> ValidateAddress(string address)
         {
             return MakeRpcRequest(new RpcRequest(nameof(ValidateAddress), address));
         }
 
         [HttpGet("getAccountAddress/{account}")]
-        [Authorize(Policy = "create:address")]
+        [Authorize(Policy = Permissions.CreateAddress)]
         public Task<object> GetAccountAddress(string account)
         {
             return MakeRpcRequest(new RpcRequest(nameof(GetAccountAddress), account));
         }
 
         [HttpPost("sendToAddress")]
-        [Authorize(Policy = "create:transaction")]
+        [Authorize(Policy = Permissions.CreateTransaction)]
         public Task<object> SendToAddress(Payment payment)
         {
             return MakeRpcRequest(new RpcRequest(nameof(SendToAddress), payment.Address, payment.Amount, payment.ExternalTransactionId));

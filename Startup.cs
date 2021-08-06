@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text;
+using Gridcoin.WebApi.Constants;
 using Gridcoin.WebApi.Controllers;
 using Gridcoin.WebApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,8 +17,6 @@ namespace Gridcoin.WebApi
 {
     public class Startup
     {
-        private readonly List<string> _scopes = new() { "read:info", "create:address", "create:transaction" };
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -65,11 +64,6 @@ namespace Gridcoin.WebApi
                         new List<string>{ }
                     }
                 });
-
-                //new Dictionary<OpenApiSecurityScheme, IList<string>>
-                //{
-                //    { oauth2, _scopes }
-                //}
             });
 
             services.AddAuthentication(options =>
@@ -84,14 +78,10 @@ namespace Gridcoin.WebApi
 
             services.AddAuthorization(options =>
             {
-                foreach (var scope in _scopes)
+                foreach (var permission in Permissions.All)
                 {
-                    options.AddPolicy(scope,
-                        p => p.RequireAssertion(
-                            ctx => ctx.User.HasClaim(
-                                c => c.Type == "scope"
-                                  && c.Value.Contains(scope)
-                                  && c.Issuer == Configuration.GetValue<string>("Authentication:Authority"))));
+                    options.AddPolicy(permission, policy =>
+                                      policy.RequireClaim("permissions", permission));
                 }
             });
 
