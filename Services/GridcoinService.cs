@@ -10,6 +10,8 @@ namespace Gridcoin.WebApi.Services
 {
     public class GridcoinService
     {
+        public const string HttpClientKey = "gridcoin";
+
         private readonly ILogger<GridcoinService> _logger;
         private readonly IHttpClientFactory _http;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
@@ -37,7 +39,7 @@ namespace Gridcoin.WebApi.Services
             var json = JsonSerializer.Serialize(rpcRequest, _jsonSerializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var client = _http.CreateClient("gridcoin");
+            var client = _http.CreateClient(HttpClientKey);
             var response = await client.PostAsync("/", content);
 
             if (!response.IsSuccessStatusCode)
