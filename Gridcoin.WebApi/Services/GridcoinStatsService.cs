@@ -25,9 +25,11 @@ namespace Gridcoin.WebApi.Services
 
             if (success)
             {
-                Metrics.CreateCounter("blocks", "The number of blocks in the chain").IncTo(info.Blocks);
-                Metrics.CreateGauge("difficulty_current", "Current difficulty").Set(info.Difficulty.Current);
-                Metrics.CreateGauge("difficulty_target", "Target difficulty").Set(info.Difficulty.Target);
+                Metrics.CreateCounter("gridcoin_blocks", "The number of blocks in the chain").IncTo(info.Blocks);
+                Metrics.CreateGauge("gridcoin_difficulty_current", "Current difficulty").Set(info.Difficulty.Current);
+                Metrics.CreateGauge("gridcoin_difficulty_target", "Target difficulty").Set(info.Difficulty.Target);
+                Metrics.CreateGauge("gridcoin_total_supply", "Total supply of Gridcoin").Set(info.MoneySupply);
+                Metrics.CreateGauge("gridcoin_total_supply", "Total supply of Gridcoin").Set(info.MoneySupply);
             }
 
             _logger.LogInformation("Finished gathering Gridcoin Stats");

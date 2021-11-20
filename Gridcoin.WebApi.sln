@@ -1,9 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.809.7
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridcoin.WebApi", "Gridcoin.WebApi.csproj", "{FE30A4F6-B36A-470F-9008-FFEF83C02AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridcoin.WebApi", "Gridcoin.WebApi\Gridcoin.WebApi.csproj", "{73C4C657-844B-4D52-B7E3-A5C84E62B105}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12E9E7B3-442B-41C8-B5F3-5336CAB7EED8}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		GrcNode.Dockerfile = GrcNode.Dockerfile
+		LICENSE = LICENSE
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +21,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FE30A4F6-B36A-470F-9008-FFEF83C02AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE30A4F6-B36A-470F-9008-FFEF83C02AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE30A4F6-B36A-470F-9008-FFEF83C02AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE30A4F6-B36A-470F-9008-FFEF83C02AF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73C4C657-844B-4D52-B7E3-A5C84E62B105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73C4C657-844B-4D52-B7E3-A5C84E62B105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73C4C657-844B-4D52-B7E3-A5C84E62B105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73C4C657-844B-4D52-B7E3-A5C84E62B105}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

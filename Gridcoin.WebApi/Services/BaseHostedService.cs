@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Gridcoin.WebApi.Services
 {
-    public class ReusableHostedService<T> : BackgroundService, IDisposable where T: IScopedProcessingService
+    public class BaseHostedService<T> : BackgroundService, IDisposable where T: IScopedProcessingService
     {
         private readonly IServiceProvider _services;
-        protected readonly ILogger<ReusableHostedService<T>> _logger;
+        protected readonly ILogger<BaseHostedService<T>> _logger;
 
-        public ReusableHostedService(IServiceProvider services, ILogger<ReusableHostedService<T>> logger)
+        public BaseHostedService(IServiceProvider services, ILogger<BaseHostedService<T>> logger)
         {
             _services = services;
             _logger = logger;
