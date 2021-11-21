@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,6 +27,16 @@ namespace Gridcoin.WebApi.Services
             return MakeRpcRequest<GetInfoResponse>(nameof(GetInfo));
         }
 
+        public Task<(bool, GetMiningInfoResponse)> GetMiningInfo()
+        {
+            return MakeRpcRequest<GetMiningInfoResponse>(nameof(GetMiningInfo));
+        }
+
+        public Task<(bool, IEnumerable<SuperBlocksResponse>)> SuperBlocks()
+        {
+            return MakeRpcRequest<IEnumerable<SuperBlocksResponse>>(nameof(SuperBlocks));
+        }
+
         private Task<(bool, T)> MakeRpcRequest<T>(string method)
         {
             return MakeRpcRequest<T>(new RpcRequest(method));
@@ -33,7 +44,7 @@ namespace Gridcoin.WebApi.Services
 
         private async Task<(bool, T)> MakeRpcRequest<T>(RpcRequest rpcRequest)
         {
-            _logger.LogInformation($"{rpcRequest.Method} called");
+            _logger.LogInformation("{Method} called", rpcRequest.Method);
 
             var json = JsonSerializer.Serialize(rpcRequest, _jsonSerializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -51,7 +62,7 @@ namespace Gridcoin.WebApi.Services
             var responseBody = await response.Content.ReadAsStringAsync();
             var responseContent = JsonSerializer.Deserialize<RpcResponse<T>>(responseBody, _jsonSerializerOptions);
 
-            _logger.LogInformation($"{rpcRequest.Method} finished", responseContent);
+            _logger.LogInformation("{Method} finished. Response: {Response}", rpcRequest.Method, responseContent);
 
             return (true, responseContent.Result);
         }

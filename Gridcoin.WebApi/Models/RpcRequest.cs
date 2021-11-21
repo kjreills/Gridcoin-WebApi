@@ -38,28 +38,28 @@ namespace Gridcoin.WebApi.Models
         public string Version { get; set; }
 
         [JsonPropertyName("minor_version")]
-        public int MinorVersion { get; set; }
+        public long MinorVersion { get; set; }
 
-        public int ProtocolVersion { get; set; }
-        public int XalletVersion { get; set; }
+        public long ProtocolVersion { get; set; }
+        public long XalletVersion { get; set; }
         public double Balance { get; set; }
-        public double NewMint { get; set; }
+        public double NewMlong { get; set; }
         public double Stake { get; set; }
-        public int Blocks { get; set; }
+        public long Blocks { get; set; }
 
         [JsonPropertyName("in_sync")]
         public bool InSync { get; set; }
 
-        public int TimeOffset { get; set; }
-        public int UpTime { get; set; }
+        public long TimeOffset { get; set; }
+        public long UpTime { get; set; }
         public double MoneySupply { get; set; }
-        public int Connections { get; set; }
+        public long Connections { get; set; }
         public string Proxy { get; set; }
         public string IP { get; set; }
         public Difficulty Difficulty { get; set; }
         public bool Testnet { get; set; }
-        public int KeyPoolOldest { get; set; }
-        public int KeyPoolSize { get; set; }
+        public long KeyPoolOldest { get; set; }
+        public long KeyPoolSize { get; set; }
         public double PayTXFee { get; set; }
         public double MinInput { get; set; }
         public string Errors { get; set; }
@@ -68,7 +68,7 @@ namespace Gridcoin.WebApi.Models
 
     public class GetMiningInfoResponse
     {
-        public int Blocks { get; set; }
+        public long Blocks { get; set; }
         public StakeWeight StakeWeight { get; set; }
         public float NetStakeWeight { get; set; }
         public float NetStakingGRCValue { get; set; }
@@ -76,10 +76,33 @@ namespace Gridcoin.WebApi.Models
 
     public class StakeWeight
     {
-        public int Minimum { get; set; }
-        public int Maximum { get; set; }
-        public int Combined { get; set; }
+        public long Minimum { get; set; }
+        public long Maximum { get; set; }
+        public long Combined { get; set; }
         public float ValueSum { get; set; }
         public float Legacy { get; set; }
+    }
+
+    public class SuperBlocksResponse
+    {
+        [JsonPropertyName("total_cpids")]
+        public long TotalCPIDs { get; set; }
+
+        [JsonPropertyName("active_beacons")]
+        public long ActiveBeacons { get; set; }
+
+        [JsonPropertyName("inactive_beacons")]
+        public long InactiveBeacons { get; set; }
+
+        [JsonPropertyName("total_projects")]
+        public long TotalProjects { get; set; }
+
+        [JsonPropertyName("total_magnitude")]
+        public long TotalMagnitude { get; set; }
+
+        [JsonPropertyName("average_magnitude")]
+        public double AverageMagnitude { get; set; }
+
+        public long Height { get; set; }
     }
 }
