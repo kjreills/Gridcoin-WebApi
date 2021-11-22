@@ -5,13 +5,16 @@ using System.Text;
 using Gridcoin.WebApi.Constants;
 using Gridcoin.WebApi.Controllers;
 using Gridcoin.WebApi.Models;
+using Gridcoin.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 
 namespace Gridcoin.WebApi
 {
@@ -95,6 +98,11 @@ namespace Gridcoin.WebApi
                 x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
             });
 
+            services.AddScoped<GridcoinService>();
+
+            services.AddScoped(x => new GridcoinStatsService(x.GetService<ILogger<GridcoinStatsService>>(), TimeSpan.FromSeconds(90), x.GetService<GridcoinService>()));
+            services.AddHostedService<BaseHostedService<GridcoinStatsService>>();
+
             services.AddHttpClient(OAuthController.HttpClientKey, x =>
             {
                 x.BaseAddress = Configuration.GetValue<Uri>("Authentication:Authority");
@@ -121,6 +129,7 @@ namespace Gridcoin.WebApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics();
             });
         }
     }
