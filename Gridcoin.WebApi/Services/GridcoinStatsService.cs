@@ -11,11 +11,13 @@ namespace Gridcoin.WebApi.Services
     {
         private readonly ILogger<GridcoinStatsService> _logger;
         private readonly GridcoinService _gridcoinService;
+        private readonly CoinGeckoService _coinGeckoService;
 
-        public GridcoinStatsService(ILogger<GridcoinStatsService> logger, TimeSpan frequency, GridcoinService gridcoinService) : base(frequency)
+        public GridcoinStatsService(ILogger<GridcoinStatsService> logger, TimeSpan frequency, GridcoinService gridcoinService, CoinGeckoService coinGeckoService) : base(frequency)
         {
             _logger = logger;
             _gridcoinService = gridcoinService;
+            _coinGeckoService = coinGeckoService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,6 +27,7 @@ namespace Gridcoin.WebApi.Services
             var (infoSuccess, info) = await _gridcoinService.GetInfo();
             var (miningSuccess, miningInfo) = await _gridcoinService.GetMiningInfo();
             var (superblocksSuccess, superblocks) = await _gridcoinService.SuperBlocks();
+            var (tickersSuccess, tickers) = await _coinGeckoService.GetTickers();
 
             if (infoSuccess)
             {
@@ -54,6 +57,11 @@ namespace Gridcoin.WebApi.Services
                     Metrics.CreateGauge("gridcoin_average_magnitude", "Average magnitude").Set(latest.AverageMagnitude);
                     Metrics.CreateGauge("gridcoin_suberblock_height", "Blockheight of last superblock").Set(latest.Height);
                 }
+            }
+
+            if (tickersSuccess)
+            {
+                //Metrics.CreateGauge("gridcoin_total_cpids", "")
             }
 
             _logger.LogInformation("Finished gathering Gridcoin Stats");

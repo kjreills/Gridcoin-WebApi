@@ -23,7 +23,4 @@
     <None Remove="Services\" />
     <None Remove="FSharp.Core" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
 </Project>
