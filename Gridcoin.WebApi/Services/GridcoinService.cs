@@ -1,7 +1,7 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Gridcoin.WebApi.Models;
 using Microsoft.Extensions.Logging;
@@ -27,6 +27,16 @@ namespace Gridcoin.WebApi.Services
             return MakeRpcRequest<GetInfoResponse>(nameof(GetInfo));
         }
 
+        public Task<(bool, GetMiningInfoResponse)> GetMiningInfo()
+        {
+            return MakeRpcRequest<GetMiningInfoResponse>(nameof(GetMiningInfo));
+        }
+
+        public Task<(bool, IEnumerable<SuperBlocksResponse>)> SuperBlocks()
+        {
+            return MakeRpcRequest<IEnumerable<SuperBlocksResponse>>(nameof(SuperBlocks));
+        }
+
         private Task<(bool, T)> MakeRpcRequest<T>(string method)
         {
             return MakeRpcRequest<T>(new RpcRequest(method));
@@ -34,7 +44,7 @@ namespace Gridcoin.WebApi.Services
 
         private async Task<(bool, T)> MakeRpcRequest<T>(RpcRequest rpcRequest)
         {
-            _logger.LogInformation($"{rpcRequest.Method} called");
+            _logger.LogInformation("{Method} called", rpcRequest.Method);
 
             var json = JsonSerializer.Serialize(rpcRequest, _jsonSerializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -50,49 +60,11 @@ namespace Gridcoin.WebApi.Services
             }
 
             var responseBody = await response.Content.ReadAsStringAsync();
-            var responseContent = JsonSerializer.Deserialize<T>(responseBody);
+            var responseContent = JsonSerializer.Deserialize<RpcResponse<T>>(responseBody, _jsonSerializerOptions);
 
-            _logger.LogInformation($"{rpcRequest.Method} finished", responseContent);
+            _logger.LogInformation("{Method} finished. Response: {Response}", rpcRequest.Method, responseContent);
 
-            return (true, responseContent);
+            return (true, responseContent.Result);
         }
-    }
-
-    public class Difficulty
-    {
-        public double Current { get; set; }
-        public double Target { get; set; }
-    }
-
-    public class GetInfoResponse
-    {        
-        public string Version { get; set; }
-
-        [JsonPropertyName("minor_version")]
-        public int MinorVersion { get; set; }
-
-        public int ProtocolVersion { get; set; }
-        public int XalletVersion { get; set; }
-        public double Balance { get; set; }
-        public double NewMint { get; set; }
-        public double Stake { get; set; }
-        public int Blocks { get; set; }
-
-        [JsonPropertyName("in_sync")]
-        public bool InSync { get; set; }
-
-        public int TimeOffset { get; set; }
-        public int UpTime { get; set; }
-        public double MoneySupply { get; set; }
-        public int Connections { get; set; }
-        public string Proxy { get; set; }
-        public string IP { get; set; }
-        public Difficulty Difficulty { get; set; }
-        public bool Testnet { get; set; }
-        public int KeyPoolOldest { get; set; }
-        public int KeyPoolSize { get; set; }
-        public double PayTXFee { get; set; }
-        public double MinInput { get; set; }
-        public string Errors { get; set; }
     }
 }

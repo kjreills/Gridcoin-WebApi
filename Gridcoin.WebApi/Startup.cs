@@ -90,7 +90,7 @@ namespace Gridcoin.WebApi
 
             services.AddSingleton(x => Configuration.GetSection("Authentication").Get<OAuthSettings>());
 
-            services.AddHttpClient(GridcoinController.HttpClientKey, x =>
+            services.AddHttpClient(GridcoinService.HttpClientKey, x =>
             {
                 var gridcoinSettings = Configuration.GetSection("Gridcoin").Get<GridcoinSettings>();
                 x.BaseAddress = gridcoinSettings.Uri;
@@ -98,9 +98,17 @@ namespace Gridcoin.WebApi
                 x.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));
             });
 
+            services.AddHttpClient(CoinGeckoService.HttpClientKey, x => x.BaseAddress = new Uri("https://api.coingecko.com/"));
+
             services.AddScoped<GridcoinService>();
 
-            services.AddScoped(x => new GridcoinStatsService(x.GetService<ILogger<GridcoinStatsService>>(), TimeSpan.FromSeconds(90), x.GetService<GridcoinService>()));
+            services.AddScoped(x =>
+                new GridcoinStatsService(
+                    x.GetService<ILogger<GridcoinStatsService>>(),
+                    TimeSpan.FromSeconds(90),
+                    x.GetService<GridcoinService>(),
+                    x.GetService<CoinGeckoService>()));
+
             services.AddHostedService<BaseHostedService<GridcoinStatsService>>();
 
             services.AddHttpClient(OAuthController.HttpClientKey, x =>
