@@ -1,0 +1,28 @@
+
+FROM debian:bullseye-slim
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y --no-install-recommends \
+  software-properties-common \
+  apt-transport-https \
+  libboost-filesystem1.74.0 \
+  libboost-iostreams1.74.0 \
+  libboost-thread1.74.0 \
+  libdb5.3++ \
+  libminiupnpc17 \
+  libzip4
+
+WORKDIR /app/
+COPY gridcoinresearchd_arm64.deb .
+RUN dpkg -i gridcoinresearchd_arm64.deb \
+  && rm gridcoinresearchd_arm64.deb
+
+RUN useradd -ms /bin/bash gridcoin
+USER gridcoin
+WORKDIR /home/gridcoin
+COPY --chown=gridcoin:gridcoin docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
+
+COPY --chown=gridcoin:gridcoin gridcoinresearch.conf ./.GridcoinResearch/
+
+ENTRYPOINT [ "/home/gridcoin/docker-entrypoint.sh" ]
